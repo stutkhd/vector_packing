@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 from mypulp import Model, quicksum, GRB
+import pandas as pd
 
 st.title('d次元ベクトルパッキング')
 
