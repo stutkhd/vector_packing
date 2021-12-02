@@ -25,6 +25,8 @@ def BDF(w, B, alpha=1.):
         R = B.sum(axis=0) #ビンに対する残り容量の和（次元ごと）
 
         s = (W**alpha)/(R+0.000001)**(2.-alpha) #次元の重要度
+        
+        print('s:', s)
 
         BS = B@s #ビンのサイズ（次元統合後）
         WS = w@s #アイテムのサイズ（次元統合後）
@@ -68,7 +70,7 @@ def create_1D_graph(bins):
   st.bar_chart(chart_data)
 
 np.random.seed(123)
-n = st.sidebar.number_input(label='アイテム個数',min_value=1, value=5)
+n = st.sidebar.number_input(label='アイテム個数',min_value=1, value=10)
 U = st.sidebar.number_input(label='ビン数', min_value=1, value=3)
 d = st.sidebar.number_input(label='考慮する要素数(次元)', min_value=1, value=1)
 
@@ -83,19 +85,40 @@ with st.expander("ビンの容量制限"):
 w = np.random.randint(lb,ub,(n,d)) # アイテム配列
 B = np.random.randint(blb,bub, (U,d)) # ビン配列
 
-st.write('アイテム集合')
-st.text(w)
-st.write('ビン集合')
-st.text(B)
+# st.write('アイテム集合')
+# st.text(w)
+# st.write('ビン集合')
+# st.text(B)
 
-bins, unassigned = BDF(w, B, alpha=1.)
+min_unassigned = [float('inf')]
+min_bins = []
+opt_alpha = float('inf')
+for alpha_param in np.arange(0.0, 2.1, 0.1):
+  w_copy = w.copy()
+  B_copy = B.copy()
+  bins, unassigned = BDF(w_copy, B_copy, alpha=alpha_param)
 
-st.write('ビン')
-st.text(bins)
-st.write('残りアイテム')
-st.text(unassigned)
-st.write('残ビン容量')
-st.text(B)
+  print('alpha_param', alpha_param)
+  print('残りビン', B)
+  print(alpha_param, 'min:', np.sum(min_unassigned), 'now:', np.sum(unassigned))
+  if np.sum(min_unassigned) > np.sum(unassigned):
+    print('hello')
+    min_unassigned = unassigned
+    min_bins = bins
+    opt_alpha = alpha_param
+print('alpha_param = 0:', np.sum(BDF(w, B.copy(), alpha=0)[1]))
+print('alpha_param = 1:', np.sum(BDF(w, B.copy(), alpha=1.0)[1]))
+print('alpha_param = 2.0:', np.sum(BDF(w, B.copy(), alpha=2.0)[1]))
+# bins, unassigned = BDF(w, B, alpha=1.)
 
-if d == 1:
-  create_1D_graph(bins)
+# st.write('最小積み残しの時のalpha')
+# st.text(opt_alpha)
+# st.write('最小積み残しの時のビンの詰め方')
+# st.text(min_bins)
+# st.write('最小残りアイテム')
+# st.text(min_unassigned)
+# st.write('残りアイテムの合計')
+# st.text(sum(min_unassigned))
+
+# if d == 1:
+#   create_1D_graph(bins)
